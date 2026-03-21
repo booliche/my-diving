@@ -2,15 +2,17 @@
 
 import { useRef, useState } from "react";
 import { ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "@/lib/firebase";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { storage, db } from "@/lib/firebase";
 
 interface FitUploaderProps {
   userId: string;
+  onDone?: () => void;
 }
 
 type UploadStatus = "idle" | "uploading" | "done" | "error";
 
-export default function FitUploader({ userId }: FitUploaderProps) {
+export default function FitUploader({ userId, onDone }: FitUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [progress, setProgress] = useState(0);
@@ -31,10 +33,21 @@ export default function FitUploader({ userId }: FitUploaderProps) {
     uploadFile(file);
   }
 
-  function uploadFile(file: File) {
+  async function uploadFile(file: File) {
     setStatus("uploading");
     setProgress(0);
     setErrorMsg(null);
+
+    const diveId = file.name.replace(/\.[^/.]+$/, "");
+
+    // Write a pending record to Firestore immediately so it shows in the list
+    await setDoc(doc(db, "users", userId, "dives", diveId), {
+      fileName: file.name,
+      fileSizeBytes: file.size,
+      status: "uploaded",
+      uploadedAt: serverTimestamp(),
+      processedAt: null,
+    });
 
     // Store under users/{userId}/dives/{filename}
     // Bucket (QA vs prod) is controlled by NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
@@ -55,11 +68,12 @@ export default function FitUploader({ userId }: FitUploaderProps) {
       },
       () => {
         setStatus("done");
-        // Reset after 3 seconds so user can upload another file
+        // Close dialog (if open) and reset after 1.5 seconds
         setTimeout(() => {
+          onDone?.();
           setStatus("idle");
           setProgress(0);
-        }, 3000);
+        }, 1500);
       }
     );
   }

@@ -5,7 +5,10 @@ import { db } from "@/lib/firebase";
 export interface Dive {
   id: string;
   fileName: string;
-  processedAt: { seconds: number } | null;
+  fileSizeBytes?: number;
+  status?: "uploaded" | "processing" | "done";
+  uploadedAt?: { seconds: number } | null;
+  processedAt?: { seconds: number } | null;
   sport?: string;
   startTime?: string;
   totalDurationSeconds?: number;
@@ -14,29 +17,51 @@ export interface Dive {
   bottomTimeSeconds?: number;
 }
 
-export function useDives(userId: string) {
+export function useDives(userId: string, pageSize = 10) {
   const [dives, setDives] = useState<Dive[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
 
     const q = query(
       collection(db, "users", userId, "dives"),
-      orderBy("processedAt", "desc")
+      orderBy("uploadedAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Dive[];
-      setDives(data);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Dive[];
+        setDives(data);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error("Firestore error:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [userId]);
 
-  return { dives, loading };
+  const totalPages = Math.ceil(dives.length / pageSize);
+  const paginated = dives.slice(page * pageSize, (page + 1) * pageSize);
+
+  return {
+    dives: paginated,
+    loading,
+    error,
+    page,
+    totalPages,
+    totalCount: dives.length,
+    setPage,
+  };
 }
