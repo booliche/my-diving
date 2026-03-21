@@ -1,0 +1,82 @@
+[debug] [2026-03-21T05:51:23.185Z] ----------------------------------------------------------------------
+[debug] [2026-03-21T05:51:23.186Z] Command:       /Users/carlosr/.nvm/versions/node/v22.22.1/bin/node /Users/carlosr/.nvm/versions/node/v22.22.1/bin/firebase init --project my-diving-40f82 --non-interactive
+[debug] [2026-03-21T05:51:23.186Z] CLI Version:   15.11.0
+[debug] [2026-03-21T05:51:23.186Z] Platform:      darwin
+[debug] [2026-03-21T05:51:23.186Z] Node Version:  v22.22.1
+[debug] [2026-03-21T05:51:23.186Z] Time:          Fri Mar 20 2026 23:51:23 GMT-0600 (Central Standard Time)
+[debug] [2026-03-21T05:51:23.187Z] ----------------------------------------------------------------------
+[debug] 
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /Users/carlosr/Workspace/personal/my-diving/webapp
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-03-21T05:51:43.297Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-21T05:51:43.298Z] > authorizing via signed-in user (booliche@gmail.com)
+[debug] [2026-03-21T05:51:43.298Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:43.298Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:43.299Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/my-diving-40f82 [none]
+[debug] [2026-03-21T05:51:43.534Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/my-diving-40f82 200
+[debug] [2026-03-21T05:51:43.534Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/my-diving-40f82 {"projectId":"my-diving-40f82","projectNumber":"565003742494","displayName":"my-diving","name":"projects/my-diving-40f82","resources":{"hostingSite":"my-diving-40f82"},"state":"ACTIVE","etag":"1_18d1dfce-5705-4f53-adb2-8ab8063e9cc5"}
+[info] i  Using project my-diving-40f82 (my-diving) . 
+[info] 
+=== Dataconnect Setup
+[info] i  dataconnect: ensuring required API firebasedataconnect.googleapis.com is enabled... 
+[debug] [2026-03-21T05:51:43.546Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:43.546Z] Checked if tokens are valid: true, expires at: 1774075679666
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2026-03-21T05:51:43.547Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:43.547Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:43.547Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-03-21T05:51:43.547Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com  x-goog-user-project=my-diving-40f82
+[debug] [2026-03-21T05:51:43.548Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com [none]
+[debug] [2026-03-21T05:51:43.548Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com  x-goog-user-project=my-diving-40f82
+[debug] [2026-03-21T05:51:44.040Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-03-21T05:51:44.040Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com [omitted]
+[warn] ⚠  dataconnect: missing required API firebasedataconnect.googleapis.com. Enabling now... 
+[debug] [2026-03-21T05:51:44.041Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:44.041Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:44.041Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com:enable [none]
+[debug] [2026-03-21T05:51:44.041Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com:enable  x-goog-user-project=my-diving-40f82
+[debug] [2026-03-21T05:51:44.044Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com 200
+[debug] [2026-03-21T05:51:44.044Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com [omitted]
+[warn] ⚠  dataconnect: missing required API sqladmin.googleapis.com. Enabling now... 
+[debug] [2026-03-21T05:51:44.044Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:44.044Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:44.044Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com:enable [none]
+[debug] [2026-03-21T05:51:44.044Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com:enable  x-goog-user-project=my-diving-40f82
+[debug] [2026-03-21T05:51:44.247Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com:enable 200
+[debug] [2026-03-21T05:51:44.247Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/sqladmin.googleapis.com:enable [omitted]
+[debug] [2026-03-21T05:51:44.573Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com:enable 200
+[debug] [2026-03-21T05:51:44.574Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/my-diving-40f82/services/firebasedataconnect.googleapis.com:enable [omitted]
+[debug] [2026-03-21T05:51:54.584Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:54.584Z] Checked if tokens are valid: true, expires at: 1774075679666
+[debug] [2026-03-21T05:51:54.584Z] >>> [apiv2][query] GET https://firebasedataconnect.googleapis.com/v1/projects/my-diving-40f82/locations/-/services [none]
+[debug] [2026-03-21T05:51:55.217Z] <<< [apiv2][status] GET https://firebasedataconnect.googleapis.com/v1/projects/my-diving-40f82/locations/-/services 200
+[debug] [2026-03-21T05:51:55.217Z] <<< [apiv2][body] GET https://firebasedataconnect.googleapis.com/v1/projects/my-diving-40f82/locations/-/services {}
+[info] i  Learn more about Gemini in Firebase and how it uses your data: https://firebase.google.com/docs/gemini-in-firebase#how-gemini-in-firebase-uses-your-data 
+[debug] [2026-03-21T05:55:07.988Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/Users/carlosr/.nvm/versions/node/v22.22.1/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:519:28)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1144:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:271:20)
+    at ReadStream.emit (node:events:531:35)
+    at emitKeys (node:internal/readline/utils:370:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+    at ReadStream.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+[error] 
+[error] Error: An unexpected error has occurred.
