@@ -17,7 +17,14 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "storage": {
-    "rules": "storage.rules"
-  }
+  "storage": [
+    {
+      "bucket": "my-diving-40f82.firebasestorage.app",
+      "rules": "storage.rules"
+    },
+    {
+      "bucket": "my-diving-40f82-qa.firebasestorage.app",
+      "rules": "storage.rules"
+    }
+  ]
 }

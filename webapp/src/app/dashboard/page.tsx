@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/lib/AuthContext";
+import { useDives } from "@/lib/useDives";
+import FitUploader from "@/components/FitUploader";
+import DiveCard from "@/components/DiveCard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { dives, loading: divesLoading } = useDives(user?.uid ?? "");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -61,18 +65,43 @@ export default function DashboardPage() {
       </header>
 
       {/* Content */}
-      <div className="mx-auto max-w-4xl px-6 py-12">
-        <h2 className="text-2xl font-bold text-gray-800">Your Dives</h2>
-        <p className="mt-2 text-gray-500">
-          Upload a .FIT file to log your first dive.
-        </p>
+      <div className="mx-auto max-w-4xl px-6 py-12 space-y-8">
 
-        {/* Placeholder — upload feature coming next */}
-        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white py-16 text-center">
-          <span className="text-5xl">📂</span>
-          <p className="mt-4 text-gray-500">No dives yet</p>
-          <p className="text-sm text-gray-400">Upload a .FIT file to get started</p>
-        </div>
+        {/* Upload section */}
+        <section>
+          <h2 className="text-2xl font-bold text-gray-800">Upload a Dive</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Upload a .FIT file from your dive computer. Data will be extracted automatically.
+          </p>
+          <div className="mt-4">
+            <FitUploader userId={user.uid} />
+          </div>
+        </section>
+
+        {/* Dives list */}
+        <section>
+          <h2 className="text-2xl font-bold text-gray-800">Your Dives</h2>
+
+          {divesLoading && (
+            <div className="mt-6 flex justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
+            </div>
+          )}
+
+          {!divesLoading && dives.length === 0 && (
+            <p className="mt-4 text-gray-400">
+              No dives yet — upload your first .FIT file above.
+            </p>
+          )}
+
+          {!divesLoading && dives.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {dives.map((dive) => (
+                <DiveCard key={dive.id} dive={dive} />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );

@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:3000", "https://my-diving-40f82--qa-7bqgya0k.web.app", "https://my-diving-40f82.web.app"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization", "Content-Length", "User-Agent"]
+  }
+]
