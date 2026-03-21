@@ -19,11 +19,11 @@
   },
   "storage": [
     {
-      "bucket": "my-diving-40f82.firebasestorage.app",
+      "bucket": "my-diving-40f82",
       "rules": "storage.rules"
     },
     {
-      "bucket": "my-diving-40f82-qa.firebasestorage.app",
+      "bucket": "my-diving-40f82-qa",
       "rules": "storage.rules"
     }
   ]
