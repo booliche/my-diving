@@ -117,12 +117,8 @@ export default function DashboardPage() {
                       <tr>
                         <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">File</th>
                         <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Uploaded</th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Sport</th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Max Depth</th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Duration</th>
                         <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Size</th>
                         <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Status</th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide"></th>
                         <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide"></th>
                       </tr>
                     </thead>

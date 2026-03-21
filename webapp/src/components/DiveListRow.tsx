@@ -9,13 +9,6 @@ function formatSize(bytes?: number): string {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
-function formatDuration(seconds?: number): string {
-  if (!seconds) return "—";
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}m ${s}s`;
-}
-
 function formatDate(ts?: { seconds: number } | null): string {
   if (!ts) return "—";
   return new Date(ts.seconds * 1000).toLocaleDateString(undefined, {
@@ -92,18 +85,6 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
       <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
         {formatDate(dive.uploadedAt)}
       </td>
-      {/* Sport */}
-      <td className="px-4 py-3 text-sm text-gray-500 capitalize">
-        {dive.sport ?? "—"}
-      </td>
-      {/* Max depth */}
-      <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-        {dive.maxDepthMeters != null ? `${dive.maxDepthMeters.toFixed(1)} m` : "—"}
-      </td>
-      {/* Duration */}
-      <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-        {formatDuration(dive.bottomTimeSeconds ?? dive.totalDurationSeconds)}
-      </td>
       {/* File size */}
       <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">
         {formatSize(dive.fileSizeBytes)}
@@ -112,61 +93,62 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
       <td className="px-4 py-3">
         <StatusBadge status={dive.status} />
       </td>
-      {/* Download */}
-      <td className="px-4 py-3 text-center">
-        <button
-          onClick={handleDownload}
-          disabled={downloading}
-          title="Download .FIT file"
-          className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-sky-700 disabled:opacity-40"
-        >
-          {downloading ? (
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
-              <path d="M12 2a10 10 0 0 1 10 10" />
-            </svg>
-          ) : (
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-          )}
-        </button>
-      </td>
-      {/* Delete */}
-      <td className="px-4 py-3 text-center">
-        {confirmDelete ? (
-          <span className="inline-flex items-center gap-1">
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
-            >
-              {deleting ? "…" : "Delete"}
-            </button>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-500 transition hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-          </span>
-        ) : (
+      {/* Actions: download + delete */}
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-1">
+          {/* Download */}
           <button
-            onClick={() => setConfirmDelete(true)}
-            title="Delete dive"
-            className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+            onClick={handleDownload}
+            disabled={downloading}
+            title="Download .FIT file"
+            className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-sky-700 disabled:opacity-40"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-            </svg>
+            {downloading ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
+                <path d="M12 2a10 10 0 0 1 10 10" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            )}
           </button>
-        )}
+          {/* Delete */}
+          {confirmDelete ? (
+            <span className="inline-flex items-center gap-1">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "…" : "Delete"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-500 transition hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+            </span>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              title="Delete dive"
+              className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+            </button>
+          )}
+        </div>
       </td>
     </tr>
   );
