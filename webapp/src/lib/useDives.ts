@@ -2,6 +2,31 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+export interface DiveSessionMesg {
+  sport?: string;
+  startTime?: string;
+  totalElapsedTime?: number;
+}
+
+export interface DiveSummaryMesg {
+  diveNumber?: number;
+  avgDepth?: number;
+  maxDepth?: number;
+  bottomTime?: number;
+  surfaceInterval?: number;
+  avgAscentRate?: number;
+  startN2?: number;
+  endN2?: number;
+  o2Toxicity?: number;
+  startCns?: number;
+  endCns?: number;
+}
+
+export interface DiveFileData {
+  sessionMesg?: DiveSessionMesg;
+  diveSummaryMesg?: DiveSummaryMesg;
+}
+
 export interface DiveFile {
   id: string;
   fileName: string;
@@ -10,29 +35,13 @@ export interface DiveFile {
   uploadedAt?: { seconds: number } | null;
   processedAt?: { seconds: number } | null;
   errorMessage?: string;
-}
-
-export interface DivePlanning {
-  sport?: string;
-  startTime?: string;
-  totalDurationSeconds?: number;
-  diveNumber?: number;
-  avgDepthMeters?: number;
-  maxDepthMeters?: number;
-  bottomTimeSeconds?: number;
-  surfaceIntervalSeconds?: number;
-  avgAscentRateMps?: number;
-  startN2Percent?: number;
-  endN2Percent?: number;
-  o2ToxicityOtus?: number;
-  startCnsPercent?: number;
-  endCnsPercent?: number;
+  data?: DiveFileData;
 }
 
 export interface Dive {
   id: string;
   file: DiveFile;
-  planning: DivePlanning;
+  planning: Record<string, unknown>;
 }
 
 export function useDives(userId: string, pageSize = 10) {

@@ -30,13 +30,13 @@
       <version>9.4.2</version>
     </dependency>
 
-    <!-- Garmin FIT SDK — add the fit.jar manually to lib/ folder -->
+    <!-- Garmin FIT SDK -->
     <dependency>
       <groupId>com.garmin.fit</groupId>
       <artifactId>fit</artifactId>
-      <version>21.141.0</version>
+      <version>21.195.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/lib/fit.jar</systemPath>
+      <systemPath>${project.basedir}/lib/fit-21.195.0.jar</systemPath>
     </dependency>
   </dependencies>
 
