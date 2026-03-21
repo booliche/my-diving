@@ -38,21 +38,27 @@ export default function FitUploader({ userId, onDone }: FitUploaderProps) {
     setProgress(0);
     setErrorMsg(null);
 
-    const diveId = file.name.replace(/\.[^/.]+$/, "");
+    const diveId = crypto.randomUUID();
 
     // Write a pending record to Firestore immediately so it shows in the list
     await setDoc(doc(db, "users", userId, "dives", diveId), {
-      fileName: file.name,
-      fileSizeBytes: file.size,
-      status: "uploaded",
-      uploadedAt: serverTimestamp(),
-      processedAt: null,
+      planning: {},
+      file: {
+        id: file.name,
+        fileName: file.name,
+        fileSizeBytes: file.size,
+        status: "uploaded",
+        uploadedAt: serverTimestamp(),
+        processedAt: null,
+      },
     });
 
     // Store under users/{userId}/dives/{filename}
     // Bucket (QA vs prod) is controlled by NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
     const storageRef = ref(storage, `users/${userId}/dives/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const uploadTask = uploadBytesResumable(storageRef, file, {
+      customMetadata: { diveId },
+    });
 
     uploadTask.on(
       "state_changed",

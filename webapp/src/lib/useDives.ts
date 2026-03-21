@@ -2,19 +2,37 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-export interface Dive {
+export interface DiveFile {
   id: string;
   fileName: string;
   fileSizeBytes?: number;
-  status?: "uploaded" | "processing" | "done";
+  status?: "uploaded" | "processing" | "done" | "error";
   uploadedAt?: { seconds: number } | null;
   processedAt?: { seconds: number } | null;
+  errorMessage?: string;
+}
+
+export interface DivePlanning {
   sport?: string;
   startTime?: string;
   totalDurationSeconds?: number;
-  maxDepthMeters?: number;
+  diveNumber?: number;
   avgDepthMeters?: number;
+  maxDepthMeters?: number;
   bottomTimeSeconds?: number;
+  surfaceIntervalSeconds?: number;
+  avgAscentRateMps?: number;
+  startN2Percent?: number;
+  endN2Percent?: number;
+  o2ToxicityOtus?: number;
+  startCnsPercent?: number;
+  endCnsPercent?: number;
+}
+
+export interface Dive {
+  id: string;
+  file: DiveFile;
+  planning: DivePlanning;
 }
 
 export function useDives(userId: string, pageSize = 10) {
@@ -28,7 +46,7 @@ export function useDives(userId: string, pageSize = 10) {
 
     const q = query(
       collection(db, "users", userId, "dives"),
-      orderBy("uploadedAt", "desc")
+      orderBy("file.uploadedAt", "desc")
     );
 
     const unsubscribe = onSnapshot(

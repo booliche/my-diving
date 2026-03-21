@@ -25,11 +25,13 @@ function StatusBadge({ status }: { status?: string }) {
     uploaded: "bg-yellow-100 text-yellow-700",
     processing: "bg-blue-100 text-blue-700",
     done: "bg-green-100 text-green-700",
+    error: "bg-red-100 text-red-700",
   };
   const label: Record<string, string> = {
     uploaded: "Pending",
     processing: "Processing",
     done: "Ready",
+    error: "Error",
   };
   const s = status ?? "uploaded";
   return (
@@ -47,11 +49,11 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
   async function handleDownload() {
     setDownloading(true);
     try {
-      const storageRef = ref(storage, `users/${userId}/dives/${dive.fileName}`);
+      const storageRef = ref(storage, `users/${userId}/dives/${dive.file.fileName}`);
       const url = await getDownloadURL(storageRef);
       const a = document.createElement("a");
       a.href = url;
-      a.download = dive.fileName;
+      a.download = dive.file.fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -64,7 +66,7 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
     setDeleting(true);
     try {
       try {
-        await deleteObject(ref(storage, `users/${userId}/dives/${dive.fileName}`));
+        await deleteObject(ref(storage, `users/${userId}/dives/${dive.file.fileName}`));
       } catch {
         // file may not exist in storage — proceed to delete Firestore record
       }
@@ -79,19 +81,19 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
     <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
       {/* File name */}
       <td className="px-4 py-3 text-sm font-medium text-gray-800 max-w-[200px] truncate">
-        {dive.fileName}
+        {dive.file.fileName}
       </td>
       {/* Uploaded at */}
       <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-        {formatDate(dive.uploadedAt)}
+        {formatDate(dive.file.uploadedAt)}
       </td>
       {/* File size */}
       <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">
-        {formatSize(dive.fileSizeBytes)}
+        {formatSize(dive.file.fileSizeBytes)}
       </td>
       {/* Status */}
       <td className="px-4 py-3">
-        <StatusBadge status={dive.status} />
+        <StatusBadge status={dive.file.status} />
       </td>
       {/* Actions: download + delete */}
       <td className="px-4 py-3">
