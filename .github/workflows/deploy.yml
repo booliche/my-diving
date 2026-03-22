@@ -49,9 +49,11 @@ jobs:
           entryPoint: webapp
           channelId: live
 
-      - name: Deploy Firestore rules
+      - name: Deploy Firestore rules to all databases
         working-directory: webapp
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
-          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules --project my-diving-40f82
+          gcloud auth activate-service-account --key-file=/tmp/sa.json --quiet
+          TOKEN=$(gcloud auth print-access-token)
+          node ../scripts/deploy-firestore-rules.js "$TOKEN"
           rm /tmp/sa.json
