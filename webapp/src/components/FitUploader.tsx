@@ -43,6 +43,7 @@ export default function FitUploader({ userId, onDone }: FitUploaderProps) {
     // Write a pending record to Firestore immediately so it shows in the list
     await setDoc(doc(db, "users", userId, "dives", diveId), {
       planning: {},
+      log: {},
       file: {
         id: file.name,
         fileName: file.name,

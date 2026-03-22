@@ -38,10 +38,40 @@ export interface DiveFile {
   data?: DiveFileData;
 }
 
+export interface DiveLogDive {
+  number?: number;
+  initialPressure?: number;
+  endingPressure?: number;
+  workingPressure?: number;
+  gas?: string;
+  nitrox?: number;
+  tankVolume?: number;
+  tcs1?: number;
+  tcs2?: number;
+  weather?: string;
+  waving?: string;
+  current?: string;
+  visibility?: number;
+  waterTemp?: number;
+  ballast?: number;
+  suitThickness?: number;
+  startTime?: { seconds: number } | null;
+  endTime?: { seconds: number } | null;
+}
+
+export interface DiveLog {
+  id?: number;
+  date?: { seconds: number } | null;
+  type?: string;
+  partner?: string;
+  dive?: DiveLogDive;
+}
+
 export interface Dive {
   id: string;
   file: DiveFile;
   planning: Record<string, unknown>;
+  log?: DiveLog;
 }
 
 export function useDives(userId: string, pageSize = 10) {
@@ -83,6 +113,7 @@ export function useDives(userId: string, pageSize = 10) {
   const paginated = dives.slice(page * pageSize, (page + 1) * pageSize);
 
   return {
+    allDives: dives,
     dives: paginated,
     loading,
     error,
