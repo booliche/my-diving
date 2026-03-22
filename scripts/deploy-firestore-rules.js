@@ -35,7 +35,6 @@ function request(method, urlPath, body) {
         method,
         headers: {
           Authorization: `Bearer ${token}`,
-          "x-goog-user-project": PROJECT,
           "Content-Type": "application/json",
           ...(data ? { "Content-Length": Buffer.byteLength(data) } : {}),
         },
