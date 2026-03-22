@@ -15,6 +15,9 @@ const firebaseConfig = {
 // Prevent re-initializing the app on hot reloads
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
+// Use named database for QA/localhost, (default) for prod
+const firestoreDatabase = process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_DATABASE;
+
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = firestoreDatabase ? getFirestore(app, firestoreDatabase) : getFirestore(app);
 export const storage = getStorage(app);

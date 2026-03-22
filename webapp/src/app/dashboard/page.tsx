@@ -1,79 +1,97 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
+import { useDives } from "@/lib/useDives";
+import DiveCard from "@/components/DiveCard";
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm text-center">
+      <p className="text-xs font-medium text-sky-600 uppercase tracking-wide">{label}</p>
+      <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+  const { allDives, loading, error } = useDives(user?.uid ?? "");
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
-    }
-  }, [user, loading, router]);
+  const recent = allDives.slice(0, 5);
+  const totalDives = allDives.length;
 
-  if (loading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-sky-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
-      </div>
-    );
-  }
+  const deepest = allDives.reduce((max, d) => {
+    const depth = d.file.data?.diveSummaryMesg?.maxDepth ?? 0;
+    return depth > max ? depth : max;
+  }, 0);
 
-  async function handleSignOut() {
-    await signOut(auth);
-    router.replace("/login");
-  }
+  const totalBottomTime = allDives.reduce(
+    (sum, d) => sum + (d.file.data?.diveSummaryMesg?.bottomTime ?? 0),
+    0
+  );
+
+  const lastDiveSeconds = allDives[0]?.file.uploadedAt?.seconds;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-sky-900 px-6 py-4 text-white shadow">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🤿</span>
-            <span className="text-lg font-semibold">My Diving</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {user.photoURL && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.photoURL}
-                alt={user.displayName ?? "User"}
-                className="h-8 w-8 rounded-full"
-                referrerPolicy="no-referrer"
-              />
-            )}
-            <span className="text-sm">{user.displayName}</span>
-            <button
-              onClick={handleSignOut}
-              className="rounded-md bg-sky-700 px-3 py-1 text-xs font-medium transition hover:bg-sky-600"
-            >
-              Sign out
-            </button>
-          </div>
+    <main className="mx-auto max-w-5xl px-6 py-10 space-y-10">
+      {/* Recent dives */}
+      <section>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold text-gray-800">Recent Dives</h2>
+          <Link href="/dashboard/dives" className="text-sm text-sky-700 hover:underline">
+            View all →
+          </Link>
         </div>
-      </header>
 
-      {/* Content */}
-      <div className="mx-auto max-w-4xl px-6 py-12">
-        <h2 className="text-2xl font-bold text-gray-800">Your Dives</h2>
-        <p className="mt-2 text-gray-500">
-          Upload a .FIT file to log your first dive.
-        </p>
+        {loading && (
+          <div className="flex justify-center py-12">
+            <div className="h-6 w-6 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
+          </div>
+        )}
 
-        {/* Placeholder — upload feature coming next */}
-        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white py-16 text-center">
-          <span className="text-5xl">📂</span>
-          <p className="mt-4 text-gray-500">No dives yet</p>
-          <p className="text-sm text-gray-400">Upload a .FIT file to get started</p>
-        </div>
-      </div>
+        {!loading && error && (
+          <p className="text-red-500 text-sm">Could not load dives: {error}</p>
+        )}
+
+        {!loading && !error && totalDives === 0 && (
+          <p className="text-gray-400">No dives yet — go to <Link href="/dashboard/dives" className="text-sky-700 hover:underline">My Dives</Link> to add your first dive.</p>
+        )}
+
+        {!loading && !error && recent.length > 0 && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {recent.map((dive) => (
+              <DiveCard key={dive.id} dive={dive} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Statistics */}
+      {!loading && totalDives > 0 && (
+        <section>
+          <h2 className="text-xl font-bold text-gray-800 mb-5">Statistics</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Total Dives" value={String(totalDives)} />
+            <StatCard
+              label="Deepest Dive"
+              value={deepest > 0 ? `${deepest.toFixed(1)} m` : "—"}
+            />
+            <StatCard
+              label="Total Bottom Time"
+              value={totalBottomTime > 0 ? `${Math.floor(totalBottomTime / 60)} min` : "—"}
+            />
+            <StatCard
+              label="Last Dive"
+              value={
+                lastDiveSeconds
+                  ? new Date(lastDiveSeconds * 1000).toLocaleDateString()
+                  : "—"
+              }
+            />
+          </div>
+        </section>
+      )}
     </main>
   );
 }

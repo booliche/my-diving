@@ -1,14 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Navigate to dashboard once auth state confirms a signed-in user.
+  // This avoids a race condition where router.push fires before
+  // onAuthStateChanged has propagated the new user into AuthContext.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   async function handleGoogleSignIn() {
     setLoading(true);
@@ -16,7 +27,7 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push("/dashboard");
+      // Navigation is handled by the useEffect above once onAuthStateChanged fires.
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

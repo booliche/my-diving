@@ -1,1 +1,4 @@
 webapp/.env.local
+samples/
+.DS_Store
+functions/.DS_Store
