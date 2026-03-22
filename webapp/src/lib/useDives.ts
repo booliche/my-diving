@@ -31,7 +31,7 @@ export interface DiveFile {
   id: string;
   fileName: string;
   fileSizeBytes?: number;
-  status?: "uploaded" | "processing" | "done" | "error";
+  status?: "uploaded" | "processing" | "done" | "error" | "no_file";
   uploadedAt?: { seconds: number } | null;
   processedAt?: { seconds: number } | null;
   errorMessage?: string;
@@ -64,7 +64,7 @@ export interface DiveLog {
   date?: { seconds: number } | null;
   type?: string;
   partner?: string;
-  dive?: DiveLogDive;
+  dive?: DiveLogDive[];
 }
 
 export interface Dive {

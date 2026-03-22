@@ -2,17 +2,18 @@
 
 import { useRef, useState } from "react";
 import { ref, uploadBytesResumable } from "firebase/storage";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { storage, db } from "@/lib/firebase";
 
 interface FitUploaderProps {
   userId: string;
+  existingDiveId?: string;
   onDone?: () => void;
 }
 
 type UploadStatus = "idle" | "uploading" | "done" | "error";
 
-export default function FitUploader({ userId, onDone }: FitUploaderProps) {
+export default function FitUploader({ userId, existingDiveId, onDone }: FitUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [progress, setProgress] = useState(0);
@@ -38,21 +39,33 @@ export default function FitUploader({ userId, onDone }: FitUploaderProps) {
     setProgress(0);
     setErrorMsg(null);
 
-    const diveId = crypto.randomUUID();
+    const diveId = existingDiveId ?? crypto.randomUUID();
 
-    // Write a pending record to Firestore immediately so it shows in the list
-    await setDoc(doc(db, "users", userId, "dives", diveId), {
-      planning: {},
-      log: {},
-      file: {
-        id: file.name,
-        fileName: file.name,
-        fileSizeBytes: file.size,
-        status: "uploaded",
-        uploadedAt: serverTimestamp(),
-        processedAt: null,
-      },
-    });
+    if (existingDiveId) {
+      // Update only the file fields on an existing dive document
+      await updateDoc(doc(db, "users", userId, "dives", diveId), {
+        "file.id": file.name,
+        "file.fileName": file.name,
+        "file.fileSizeBytes": file.size,
+        "file.status": "uploaded",
+        "file.uploadedAt": serverTimestamp(),
+        "file.processedAt": null,
+      });
+    } else {
+      // Create a new pending record
+      await setDoc(doc(db, "users", userId, "dives", diveId), {
+        planning: {},
+        log: {},
+        file: {
+          id: file.name,
+          fileName: file.name,
+          fileSizeBytes: file.size,
+          status: "uploaded",
+          uploadedAt: serverTimestamp(),
+          processedAt: null,
+        },
+      });
+    }
 
     // Store under users/{userId}/dives/{filename}
     // Bucket (QA vs prod) is controlled by NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET

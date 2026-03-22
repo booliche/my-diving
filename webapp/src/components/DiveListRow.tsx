@@ -26,12 +26,14 @@ function StatusBadge({ status }: { status?: string }) {
     processing: "bg-blue-100 text-blue-700",
     done: "bg-green-100 text-green-700",
     error: "bg-red-100 text-red-700",
+    no_file: "bg-gray-100 text-gray-500",
   };
   const label: Record<string, string> = {
     uploaded: "Pending",
     processing: "Processing",
     done: "Ready",
     error: "Error",
+    no_file: "No file",
   };
   const s = status ?? "uploaded";
   return (
@@ -41,7 +43,7 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
-export default function DiveListRow({ dive, index, userId }: { dive: Dive; index: number; userId: string }) {
+export default function DiveListRow({ dive, index, userId, onUploadClick }: { dive: Dive; index: number; userId: string; onUploadClick?: () => void }) {
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -79,13 +81,15 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
 
   return (
     <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-      {/* File name */}
+      {/* File name / log label */}
       <td className="px-4 py-3 text-sm font-medium text-gray-800 max-w-[200px] truncate">
-        {dive.file.fileName}
+        {dive.file.fileName ||
+          [dive.log?.type, dive.log?.partner].filter(Boolean).join(" · ") ||
+          "—"}
       </td>
-      {/* Uploaded at */}
+      {/* Uploaded at / log date */}
       <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-        {formatDate(dive.file.uploadedAt)}
+        {formatDate(dive.file.uploadedAt ?? dive.log?.date)}
       </td>
       {/* File size */}
       <td className="px-4 py-3 text-sm text-gray-400 whitespace-nowrap">
@@ -95,29 +99,43 @@ export default function DiveListRow({ dive, index, userId }: { dive: Dive; index
       <td className="px-4 py-3">
         <StatusBadge status={dive.file.status} />
       </td>
-      {/* Actions: download + delete */}
+      {/* Actions: upload + download + delete */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-1">
-          {/* Download */}
+          {/* Upload FIT file */}
           <button
-            onClick={handleDownload}
-            disabled={downloading}
-            title="Download .FIT file"
-            className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-sky-700 disabled:opacity-40"
+            onClick={onUploadClick}
+            title="Upload FIT file"
+            className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-sky-700"
           >
-            {downloading ? (
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
-                <path d="M12 2a10 10 0 0 1 10 10" />
-              </svg>
-            ) : (
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-            )}
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
           </button>
+          {/* Download — only when a FIT file is attached */}
+          {dive.file.status !== "no_file" && (
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              title="Download .FIT file"
+              className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-sky-700 disabled:opacity-40"
+            >
+              {downloading ? (
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
+                  <path d="M12 2a10 10 0 0 1 10 10" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              )}
+            </button>
+          )}
           {/* Delete */}
           {confirmDelete ? (
             <span className="inline-flex items-center gap-1">

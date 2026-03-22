@@ -5,12 +5,14 @@ import { useAuth } from "@/lib/AuthContext";
 import { useDives } from "@/lib/useDives";
 import FitUploader from "@/components/FitUploader";
 import DiveListRow from "@/components/DiveListRow";
+import AddDiveModal from "@/components/AddDiveModal";
 
 const PAGE_SIZE = 10;
 
 export default function DivesPage() {
   const { user } = useAuth();
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const [addDiveOpen, setAddDiveOpen] = useState(false);
+  const [uploadForDiveId, setUploadForDiveId] = useState<string | null>(null);
   const { dives, loading, error, page, totalPages, totalCount, setPage } =
     useDives(user?.uid ?? "", PAGE_SIZE);
 
@@ -22,19 +24,18 @@ export default function DivesPage() {
         <div className="flex items-center gap-4">
           {!loading && !error && totalCount > 0 && (
             <span className="text-sm text-gray-400">
-              {totalCount} file{totalCount !== 1 ? "s" : ""}
+              {totalCount} dive{totalCount !== 1 ? "s" : ""}
             </span>
           )}
           <button
-            onClick={() => setUploadOpen(true)}
+            onClick={() => setAddDiveOpen(true)}
             className="inline-flex items-center gap-2 rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-600"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Upload a Dive
+            Add Dive
           </button>
         </div>
       </div>
@@ -50,7 +51,7 @@ export default function DivesPage() {
       )}
 
       {!loading && !error && totalCount === 0 && (
-        <p className="text-gray-400">No dives yet — upload your first .FIT file above.</p>
+        <p className="text-gray-400">No dives yet — click "Add Dive" to log your first dive.</p>
       )}
 
       {!loading && !error && totalCount > 0 && (
@@ -60,8 +61,8 @@ export default function DivesPage() {
               <table className="min-w-full divide-y divide-gray-200 text-left">
                 <thead className="bg-sky-900 text-white">
                   <tr>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">File</th>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Uploaded</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Dive</th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Date</th>
                     <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Size</th>
                     <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Status</th>
                     <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide"></th>
@@ -69,7 +70,13 @@ export default function DivesPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {dives.map((dive, i) => (
-                    <DiveListRow key={dive.id} dive={dive} index={i} userId={user?.uid ?? ""} />
+                    <DiveListRow
+                      key={dive.id}
+                      dive={dive}
+                      index={i}
+                      userId={user?.uid ?? ""}
+                      onUploadClick={() => setUploadForDiveId(dive.id)}
+                    />
                   ))}
                 </tbody>
               </table>
@@ -79,9 +86,7 @@ export default function DivesPage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-              <span>
-                Page {page + 1} of {totalPages}
-              </span>
+              <span>Page {page + 1} of {totalPages}</span>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -103,30 +108,42 @@ export default function DivesPage() {
         </>
       )}
 
-      {/* Upload dialog */}
-      {uploadOpen && (
+      {/* Add Dive modal */}
+      {addDiveOpen && (
+        <AddDiveModal
+          userId={user?.uid ?? ""}
+          onClose={() => setAddDiveOpen(false)}
+          onSaved={() => setAddDiveOpen(false)}
+        />
+      )}
+
+      {/* Per-row FIT upload modal */}
+      {uploadForDiveId && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) setUploadOpen(false); }}
+          onClick={(e) => { if (e.target === e.currentTarget) setUploadForDiveId(null); }}
         >
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800">Upload a Dive</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Upload FIT File</h2>
               <button
-                onClick={() => setUploadOpen(false)}
+                onClick={() => setUploadForDiveId(null)}
                 className="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
                 aria-label="Close"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
             <p className="mb-4 text-sm text-gray-500">
-              Upload a .FIT file from your dive computer. Data will be extracted automatically.
+              Attach a .FIT file from your dive computer to this dive record.
             </p>
-            <FitUploader userId={user?.uid ?? ""} onDone={() => setUploadOpen(false)} />
+            <FitUploader
+              userId={user?.uid ?? ""}
+              existingDiveId={uploadForDiveId}
+              onDone={() => setUploadForDiveId(null)}
+            />
           </div>
         </div>
       )}
