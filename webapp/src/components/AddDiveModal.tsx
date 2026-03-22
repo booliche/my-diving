@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Dive, DiveLogDive } from "@/lib/useDives";
 
 interface Props {
   userId: string;
+  initialDive?: Dive;
+  diveDocId?: string;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -43,6 +46,43 @@ const WEATHER_OPTIONS = ["Sunny", "Partly Cloudy", "Cloudy", "Rainy", "Stormy", 
 const WAVING_OPTIONS = ["Calm", "Light", "Moderate", "Heavy"];
 const CURRENT_OPTIONS = ["None", "Light", "Moderate", "Strong"];
 
+function tsToDateStr(ts?: { seconds: number } | null): string {
+  if (!ts) return "";
+  const d = new Date(ts.seconds * 1000);
+  return d.toISOString().slice(0, 10);
+}
+
+function tsToTimeStr(ts?: { seconds: number } | null): string {
+  if (!ts) return "";
+  const d = new Date(ts.seconds * 1000);
+  return d.toTimeString().slice(0, 5);
+}
+
+function diveLogDiveToForm(d?: DiveLogDive): DiveForm {
+  if (!d) return emptyDive();
+  return {
+    number:          d.number?.toString()         ?? "",
+    initialPressure: d.initialPressure?.toString() ?? "",
+    endingPressure:  d.endingPressure?.toString()  ?? "",
+    workingPressure: d.workingPressure?.toString() ?? "",
+    gas:             d.gas                         ?? "Air",
+    nitrox:          d.nitrox?.toString()          ?? "",
+    tankVolume:      d.tankVolume?.toString()       ?? "",
+    tcs1:            d.tcs1?.toString()             ?? "",
+    tcs2:            d.tcs2?.toString()             ?? "",
+    weather:         d.weather                     ?? "",
+    waving:          d.waving                      ?? "",
+    current:         d.current                     ?? "",
+    visibility:      d.visibility?.toString()      ?? "",
+    waterTemp:       d.waterTemp?.toString()        ?? "",
+    ballast:         d.ballast?.toString()          ?? "",
+    suitThickness:   d.suitThickness?.toString()   ?? "",
+    startTime:       tsToTimeStr(d.startTime),
+    endTime:         tsToTimeStr(d.endTime),
+  };
+}
+
+
 function emptyDive(): DiveForm {
   return {
     number: "", initialPressure: "", endingPressure: "", workingPressure: "",
@@ -78,7 +118,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         step={type === "number" ? "any" : undefined}
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none"
+        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-sky-400 focus:outline-none"
       />
     </div>
   );
@@ -95,7 +135,7 @@ function SelectField({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none bg-white"
+        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-sky-400 focus:outline-none bg-white"
       >
         <option value="">Select…</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
@@ -108,9 +148,20 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">{children}</p>;
 }
 
-export default function AddDiveModal({ userId, onClose, onSaved }: Props) {
-  const [log, setLog] = useState<LogForm>({ id: "", date: "", type: "", partner: "" });
-  const [dives, setDives] = useState<DiveForm[]>([emptyDive()]);
+export default function AddDiveModal({ userId, initialDive, diveDocId, onClose, onSaved }: Props) {
+  const isEditing = Boolean(diveDocId);
+
+  const [log, setLog] = useState<LogForm>(() => ({
+    id:      initialDive?.log?.id?.toString()     ?? "",
+    date:    tsToDateStr(initialDive?.log?.date)  ?? "",
+    type:    initialDive?.log?.type               ?? "",
+    partner: initialDive?.log?.partner            ?? "",
+  }));
+  const [dives, setDives] = useState<DiveForm[]>(() =>
+    initialDive?.log?.dive?.length
+      ? initialDive.log.dive.map(diveLogDiveToForm)
+      : [emptyDive()]
+  );
   const [activeTab, setActiveTab] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -138,7 +189,7 @@ export default function AddDiveModal({ userId, onClose, onSaved }: Props) {
   async function handleSave() {
     setSaving(true);
     try {
-      const diveId = crypto.randomUUID();
+      const docId = diveDocId ?? crypto.randomUUID();
       const dateTs = log.date ? Timestamp.fromDate(new Date(log.date + "T12:00:00")) : null;
 
       const diveEntries = dives.map((d) => {
@@ -166,20 +217,26 @@ export default function AddDiveModal({ userId, onClose, onSaved }: Props) {
         return entry;
       });
 
-      await setDoc(doc(db, "users", userId, "dives", diveId), {
-        planning: {},
-        log: {
-          ...(log.id      ? { id:      parseInt(log.id) } : {}),
-          ...(dateTs      ? { date:    dateTs }           : {}),
-          ...(log.type    ? { type:    log.type }         : {}),
-          ...(log.partner ? { partner: log.partner }      : {}),
-          dive: diveEntries,
-        },
-        file: {
-          id: "", fileName: "", fileSizeBytes: 0,
-          status: "no_file", uploadedAt: null, processedAt: null,
-        },
-      });
+      const logPayload = {
+        ...(log.id      ? { id:      parseInt(log.id) } : {}),
+        ...(dateTs      ? { date:    dateTs }           : {}),
+        ...(log.type    ? { type:    log.type }         : {}),
+        ...(log.partner ? { partner: log.partner }      : {}),
+        dive: diveEntries,
+      };
+
+      if (isEditing) {
+        await updateDoc(doc(db, "users", userId, "dives", docId), { log: logPayload });
+      } else {
+        await setDoc(doc(db, "users", userId, "dives", docId), {
+          planning: {},
+          log: logPayload,
+          file: {
+            id: "", fileName: "", fileSizeBytes: 0,
+            status: "no_file", uploadedAt: null, processedAt: null,
+          },
+        });
+      }
 
       onSaved();
       onClose();
@@ -198,7 +255,7 @@ export default function AddDiveModal({ userId, onClose, onSaved }: Props) {
       <div className="flex flex-col w-full max-w-2xl max-h-[90vh] rounded-2xl bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 shrink-0">
-          <h2 className="text-lg font-semibold text-gray-800">Add Dive</h2>
+          <h2 className="text-lg font-semibold text-gray-800">{isEditing ? "Edit Dive" : "Add Dive"}</h2>
           <button
             onClick={onClose}
             className="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
@@ -334,7 +391,7 @@ export default function AddDiveModal({ userId, onClose, onSaved }: Props) {
             disabled={saving}
             className="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-600 disabled:opacity-50"
           >
-            {saving ? "Saving…" : "Save Dive"}
+            {saving ? "Saving…" : isEditing ? "Save Changes" : "Save Dive"}
           </button>
         </div>
       </div>

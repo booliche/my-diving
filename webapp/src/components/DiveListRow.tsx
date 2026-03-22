@@ -43,7 +43,7 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
-export default function DiveListRow({ dive, index, userId, onUploadClick }: { dive: Dive; index: number; userId: string; onUploadClick?: () => void }) {
+export default function DiveListRow({ dive, index, userId, onUploadClick, onEditClick, onRowClick }: { dive: Dive; index: number; userId: string; onUploadClick?: () => void; onEditClick?: () => void; onRowClick?: () => void }) {
   const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -80,9 +80,12 @@ export default function DiveListRow({ dive, index, userId, onUploadClick }: { di
   }
 
   return (
-    <tr className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+    <tr
+      className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} cursor-pointer hover:bg-sky-50 transition-colors`}
+      onClick={onRowClick}
+    >
       {/* File name / log label */}
-      <td className="px-4 py-3 text-sm font-medium text-gray-800 max-w-[200px] truncate">
+      <td className="px-4 py-3 text-sm font-medium text-gray-800 max-w-[200px] truncate" onClick={(e) => e.stopPropagation()}>
         {dive.file.fileName ||
           [dive.log?.type, dive.log?.partner].filter(Boolean).join(" · ") ||
           "—"}
@@ -99,9 +102,20 @@ export default function DiveListRow({ dive, index, userId, onUploadClick }: { di
       <td className="px-4 py-3">
         <StatusBadge status={dive.file.status} />
       </td>
-      {/* Actions: upload + download + delete */}
-      <td className="px-4 py-3">
+      {/* Actions: edit + upload + download + delete */}
+      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-1">
+          {/* Edit log data */}
+          <button
+            onClick={onEditClick}
+            title="Edit dive"
+            className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-sky-700"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
           {/* Upload FIT file */}
           <button
             onClick={onUploadClick}

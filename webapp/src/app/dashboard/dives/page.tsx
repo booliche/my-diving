@@ -6,6 +6,8 @@ import { useDives } from "@/lib/useDives";
 import FitUploader from "@/components/FitUploader";
 import DiveListRow from "@/components/DiveListRow";
 import AddDiveModal from "@/components/AddDiveModal";
+import DiveDetailModal from "@/components/DiveDetailModal";
+import { Dive } from "@/lib/useDives";
 
 const PAGE_SIZE = 10;
 
@@ -13,6 +15,8 @@ export default function DivesPage() {
   const { user } = useAuth();
   const [addDiveOpen, setAddDiveOpen] = useState(false);
   const [uploadForDiveId, setUploadForDiveId] = useState<string | null>(null);
+  const [editDive, setEditDive] = useState<Dive | null>(null);
+  const [detailDive, setDetailDive] = useState<Dive | null>(null);
   const { dives, loading, error, page, totalPages, totalCount, setPage } =
     useDives(user?.uid ?? "", PAGE_SIZE);
 
@@ -76,6 +80,8 @@ export default function DivesPage() {
                       index={i}
                       userId={user?.uid ?? ""}
                       onUploadClick={() => setUploadForDiveId(dive.id)}
+                      onEditClick={() => setEditDive(dive)}
+                      onRowClick={() => setDetailDive(dive)}
                     />
                   ))}
                 </tbody>
@@ -114,6 +120,26 @@ export default function DivesPage() {
           userId={user?.uid ?? ""}
           onClose={() => setAddDiveOpen(false)}
           onSaved={() => setAddDiveOpen(false)}
+        />
+      )}
+
+      {/* Edit Dive modal */}
+      {editDive && (
+        <AddDiveModal
+          userId={user?.uid ?? ""}
+          initialDive={editDive}
+          diveDocId={editDive.id}
+          onClose={() => setEditDive(null)}
+          onSaved={() => setEditDive(null)}
+        />
+      )}
+
+      {/* Dive Detail modal */}
+      {detailDive && (
+        <DiveDetailModal
+          dive={detailDive}
+          onClose={() => setDetailDive(null)}
+          onEdit={() => { setEditDive(detailDive); setDetailDive(null); }}
         />
       )}
 
