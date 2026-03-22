@@ -77,16 +77,16 @@ async function main() {
     const rulesetName = rsResp.body.name;
     const releaseName = `projects/${PROJECT}/releases/cloud.firestore/${db}`;
 
+    const releaseBody = { name: releaseName, rulesetName };
+
     // Try PATCH first (release already exists); fall back to POST (create) on 404
-    let releaseResp = await request("PATCH", `/v1/${releaseName}`, {
-      release: { name: releaseName, rulesetName },
-    });
+    let releaseResp = await request("PATCH", `/v1/${releaseName}`, releaseBody);
 
     if (releaseResp.status === 404) {
       releaseResp = await request(
         "POST",
         `/v1/projects/${PROJECT}/releases`,
-        { release: { name: releaseName, rulesetName } }
+        releaseBody
       );
     }
 
