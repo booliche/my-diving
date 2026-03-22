@@ -48,3 +48,10 @@ jobs:
           projectId: my-diving-40f82
           entryPoint: webapp
           channelId: live
+
+      - name: Deploy Firestore rules
+        working-directory: webapp
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json npx firebase-tools deploy --only firestore:rules --project my-diving-40f82
+          rm /tmp/sa.json
