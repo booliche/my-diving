@@ -77,12 +77,21 @@ async function main() {
     const rulesetName = rsResp.body.name;
     const releaseName = `projects/${PROJECT}/releases/cloud.firestore/${db}`;
 
-    const patchResp = await request("PATCH", `/v1/${releaseName}`, {
+    // Try PATCH first (release already exists); fall back to POST (create) on 404
+    let releaseResp = await request("PATCH", `/v1/${releaseName}`, {
       release: { name: releaseName, rulesetName },
     });
 
-    if (patchResp.status !== 200) {
-      console.error(`\nFailed to update release for ${db}:`, patchResp.body);
+    if (releaseResp.status === 404) {
+      releaseResp = await request(
+        "POST",
+        `/v1/projects/${PROJECT}/releases`,
+        { release: { name: releaseName, rulesetName } }
+      );
+    }
+
+    if (releaseResp.status !== 200) {
+      console.error(`\nFailed to update release for ${db}:`, releaseResp.body);
       process.exit(1);
     }
 
