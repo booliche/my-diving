@@ -21,7 +21,7 @@ if (!token) {
 }
 
 const PROJECT = "my-diving-40f82";
-const DATABASES = ["(default)", "my-diving-40f82-qa", "my-diving-40f82"];
+const DATABASES = ["my-diving-40f82-qa", "my-diving-40f82"];
 const rulesPath = path.join(__dirname, "..", "webapp", "firestore.rules");
 const RULES = fs.readFileSync(rulesPath, "utf8");
 
