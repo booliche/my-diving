@@ -79,8 +79,10 @@ async function main() {
 
     const releaseBody = { name: releaseName, rulesetName };
 
-    // Try PATCH first (release already exists); fall back to POST (create) on 404
-    let releaseResp = await request("PATCH", `/v1/${releaseName}`, releaseBody);
+    // PATCH requires the object wrapped in a "release" key; POST does not
+    let releaseResp = await request("PATCH", `/v1/${releaseName}`, {
+      release: releaseBody,
+    });
 
     if (releaseResp.status === 404) {
       releaseResp = await request(
